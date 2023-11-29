@@ -1,0 +1,6 @@
+[submodule "vendor/bluecheck"]
+	path = vendor/bluecheck
+	url = https://github.com/CTSRD-CHERI/bluecheck.git
+[submodule "vendor/bluespec-cmake"]
+	path = vendor/bluespec-cmake
+	url = https://github.com/yuyuranium/bluespec-cmake.git
