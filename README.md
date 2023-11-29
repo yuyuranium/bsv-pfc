@@ -44,7 +44,7 @@ or
 ```bash
 # In bsv-pfc
 cmake -S . -B build -G Ninja
-camke --build build
+cmake --build build
 ```
 
 Note that this project assumes SystemC-2.3.4 is installed under `/usr/local/share`. You can edit [here](https://github.com/yuyuranium/bsv-pfc/blob/a7d36a02f6b24e64b64511c3924138b0cc0d424d/sim/CMakeLists.txt#L6) to meet your installation requirements.
@@ -62,16 +62,9 @@ To run the `pfc-sim`, you need to input a post-fix expression from the command l
 
 ```bash
 # In bsv-pfc
-./build/bin/pfc-sim ./bin/pfc-sim 1 2 + 4 swap sub
-# ...
-# [5500 ps]	Pushing: 1
-# [6500 ps]	Pushing: 2
-# [7500 ps]	Executing: +
-# [11500 ps]	Pushing: 4
-# [12500 ps]	Executing: swap
-# [17500 ps]	Executing: sub
-# [21500 ps]	Got result: 1
+./build/bin/pfc-sim 1 2 + 4 swap sub
 ```
+And you will get a result of 1. (4 - (1 + 2) = 1)
 
 ### Verilog generation
 
