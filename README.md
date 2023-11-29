@@ -66,6 +66,8 @@ To run the `pfc-sim`, you need to input a post-fix expression from the command l
 ```
 And you will get a result of 1. (4 - (1 + 2) = 1)
 
+A simulation trace (`trace.vcd`) will be generated for debugging. You can open it with waveform viewer, e.g.,  GTKWave or nWave.
+
 ### Verilog generation
 
 Verilog code for `PostfixCalculator32x32` (32-bit data and depth 32) is generated under `build/lib/Verilog`
