@@ -69,7 +69,7 @@ module mkPostfixCalculator#(Integer mem_depth) (PostfixCalculator#(data_t))
       // Do arithmetic computation
       action  // get second operand
         opd1 <= stack.top;
-        stack.pop;
+        stack.pop();
       endaction
       stack.push(arithm_compute(opd1, opd2, op));  // push the result
     endseq else if (op == PFCDup) seq
@@ -79,7 +79,7 @@ module mkPostfixCalculator#(Integer mem_depth) (PostfixCalculator#(data_t))
     endseq else if (op == PFCSwap) seq
       action  // get second operand
         opd1 <= stack.top;
-        stack.pop;
+        stack.pop();
       endaction
       // push the operands in reversed order
       stack.push(opd2);
