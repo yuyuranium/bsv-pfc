@@ -1,5 +1,6 @@
 #include <systemc.h>
 #include <vector>
+#include <chrono>
 
 #include "mkPostfixCalculator32x32_systemc.h"
 #include "InstGen.h"
@@ -85,10 +86,17 @@ int sc_main(int argc, char *argv[])
     sc_trace(Tf, push_opd, "push_opd");
     sc_trace(Tf, push_ready, "push_ready");
 
+    auto start = std::chrono::high_resolution_clock::now();
     rst_n.write(false);
     sc_start(5, SC_NS);
     rst_n.write(true);
     sc_start();
+    double t = sc_time_stamp().to_seconds() * 1000000000;
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration =
+        std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+    std::cout << "Simulation time: " << duration.count() << " seconds\n";
+    std::cout << "Simulation freq: " << t / duration.count() / 100 << " kHz\n";
     sc_close_vcd_trace_file(Tf);  
     return 0;
 }
