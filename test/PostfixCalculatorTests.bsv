@@ -2,30 +2,29 @@ import BlueCheck::*;
 import Stack::*;
 import PostfixCalculator::*;
 import StmtFSM::*;
-import Clocks::*;
 
-module [BlueCheck] mkPostfixCalculatorSpec#(Reset r) ();
+typedef Int#(32) DType;
+
+Integer kStackDepth = 100;
+
+module [BlueCheck] mkPostfixCalculatorSpec ();
   Ensure ensure <- getEnsure;
 
-  PostfixCalculator#(Int#(8)) dut <- mkPostfixCalculator(reset_by r, 8);
+  PostfixCalculator#(DType) dut <- mkPostfixCalculator(kStackDepth);
+  Reg#(DType) tmp <- mkReg(0);
 
-  Reg#(Int#(8)) tmp <- mkReg(0);
-  Reg#(Int#(32)) cnt <- mkReg(0);
-
-  function Stmt push(Int#(8) x) =
+  function Stmt push(DType x) =
     seq
-      if (dut.isFull()) seq
-        dut.exec(PFCAdd);  // reduce
-      endseq else seq
+      if (!dut.isFull()) seq
         dut.push(x);
         ensure(dut.getResult() == x);
       endseq
     endseq;
 
-  function Stmt testOp(Int#(8) x, PFCInst op) = 
+  function Stmt testOp(DType x, PFCInst op) =
     seq
       if (dut.isFull()) seq
-        dut.exec(PFCAdd);
+        dut.exec(PFCPop);
       endseq
 
       action
@@ -35,20 +34,20 @@ module [BlueCheck] mkPostfixCalculatorSpec#(Reset r) ();
 
       action
         tmp <= case (op)
-          PFCAdd:   return tmp + x;
-          PFCSub:   return tmp - x;
-          PFCSrl:   return tmp >> x;
-          PFCSll:   return tmp << x;
-          PFCAnd:   return tmp & x;
-          PFCOr:    return tmp | x;
-          PFCXor:   return tmp ^ x;
+          PFCAdd:  return tmp + x;
+          PFCSub:  return tmp - x;
+          PFCSrl:  return tmp >> x;
+          PFCSll:  return tmp << x;
+          PFCAnd:  return tmp & x;
+          PFCOr:   return tmp | x;
+          PFCXor:  return tmp ^ x;
           default: return tmp;
         endcase;
-        if (!(dut.isFull && op == PFCDup)) action
-          dut.exec(op);
-        endaction
       endaction
 
+      if (!(dut.isFull && op == PFCDup || dut.isEmpty && op == PFCPop)) action
+        dut.exec(op);
+      endaction
 
       if (pack(op) <= pack(PFCXor)) seq
         $display("res = %d expect = %d", dut.getResult(), tmp);
@@ -62,13 +61,14 @@ module [BlueCheck] mkPostfixCalculatorSpec#(Reset r) ();
       endseq
     endseq;
 
-  function Stmt dup(Int#(8) x) =
+  function Stmt dup() =
     seq
       if (dut.isFull()) seq
         dut.exec(PFCAdd);
       endseq else if (dut.isEmpty()) seq
-        push(x);
+        push(tmp);
       endseq
+
       action
         tmp <= dut.getResult();
         dut.exec(PFCDup);
@@ -83,5 +83,13 @@ module [BlueCheck] mkPostfixCalculatorSpec#(Reset r) ();
 endmodule
 
 module [Module] mkPostfixCalculatorTester ();
-  blueCheck(mkPostfixCalculatorSpec(noReset));
+  // Customise default BlueCheck parameters
+  BlueCheck_Params params = bcParams;
+  params.showTime = True;
+  params.allowViewing = True;
+  params.numIterations = 100000;
+
+  // Generate checker
+  Stmt s <- mkModelChecker(mkPostfixCalculatorSpec, params);
+  mkAutoFSM(s);
 endmodule
