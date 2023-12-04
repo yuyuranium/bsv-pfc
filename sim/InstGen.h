@@ -11,6 +11,8 @@ SC_MODULE(InstGen) {
     sc_in<bool> clk_i;
     sc_in<bool> rst_ni;
 
+    sc_in<bool> full;
+
     sc_in<sc_bv<32> > result;
     sc_in<bool> result_ready;
     

@@ -28,6 +28,12 @@ void InstGen::handle_clk()
                 wait();
             } else {
                 int opd = p.second;
+                if (full.read()) {
+                    std::cout << "[" << sc_time_stamp() << "]\t"
+                              << "Error: Stack overflowed when pushing "
+                              << opd << "\n";
+                    sc_stop();
+                }
                 while (!push_ready.read()) {
                     wait();
                 }

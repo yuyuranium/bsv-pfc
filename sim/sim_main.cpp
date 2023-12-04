@@ -64,6 +64,7 @@ int sc_main(int argc, char *argv[])
     InstGen *igen = new InstGen("igen", expr);
     igen->clk_i(clk);
     igen->rst_ni(rst_n);
+    igen->full(full);
     igen->result(result);
     igen->result_ready(result_ready);
     igen->exec_en(exec_en);
