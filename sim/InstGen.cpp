@@ -52,8 +52,16 @@ void InstGen::handle_clk()
         while (!result_ready.read()) {
             wait();
         }
+        int result_int = result.read().to_int();
         std::cout << "[" << sc_time_stamp() << "]\t"
-                  << "Got result: " << result.read().to_int() << "\n";
+                  << "Got result: " << result_int << "\n";
+        if (has_golden) {
+            if (result_int == golden) {
+                std::cout << "[PASSED]\tResult equals to golden!\n";
+            } else {
+                std::cout << "[FAILED]\tResult does NOT equal to golden!\n";
+            }
+        }
         sc_stop();
     }
 }

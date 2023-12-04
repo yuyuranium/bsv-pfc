@@ -68,6 +68,26 @@ And you will get a result of 1. (4 - (1 + 2) = 1)
 
 A simulation trace (`trace.vcd`) will be generated for debugging. You can open it with waveform viewer, e.g.,  GTKWave or nWave.
 
+You can also use `utils/pfgen.py` to generate a random post-fix expression with pre-computed golden
+value. The python script takes 1 argument `n` to determine the length of the generated expression.
+
+```bash
+./utils/pfgen.py 100  # Generate a post-fix expression with 100 terms
+```
+
+By passing the generated expression to the simulator, you can verify the correctness of the simulation.
+
+```bash
+./build/bin/pfc-sim `./utils/pfgen.py 100`
+```
+
+For more information, you can use `-h` flag on both `pfgen.py` and `pfc-sim` to see the usage of the program.
+
+```bash
+./utils/pfgen.py -h
+./build/bin/pfc-sim -h
+```
+
 ### Verilog generation
 
 Verilog code for `PostfixCalculator32x32` (32-bit data and depth 32) is generated under `build/lib/Verilog`

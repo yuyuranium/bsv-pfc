@@ -1,31 +1,73 @@
 #include <systemc.h>
 #include <vector>
 #include <chrono>
+#include <getopt.h>
 
 #include "mkPostfixCalculator32x32_systemc.h"
 #include "InstGen.h"
 
+void usage(char *prog_name)
+{
+    std::cout << "\nPlease provide a postifx expression to the simulator\n"
+              << "\nUsage:\n    " << prog_name << " <postfix-expr> [--golden=<golden>]\n\n"
+              << "Operands are 32-bit signed integer\n"
+              << "Supported operator (instructions):\n"
+              << "    add (+)\n"
+              << "    sub (-)\n"
+              << "    srl (>>)\n"
+              << "    sll (<<)\n"
+              << "    and (&)\n"
+              << "    or  (|)\n"
+              << "    xor (^)\n"
+              << "    dup\n"
+              << "    swap\n"
+              << "    eqz\n"
+              << "    pop\n"
+              << "\noptions\n"
+              << "    --golden | -g <golden> Specify the golden value of the expression\n"
+              << "\nExample:\n    " << prog_name << " 1 2 + 4 swap sub\n\n";
+}
+
 int sc_main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        std::cout << "\nPlease provide a postifx expression to the simulator\n"
-                  << "\nUsage:\n    " << argv[0] << " <postfix-expr>\n\n"
-                  << "Operands are 32-bit signed integer\n"
-                  << "Supported operator (instructions) are\n"
-                  << "    add (+)\n"
-                  << "    sub (-)\n"
-                  << "    srl (>>)\n"
-                  << "    sll (<<)\n"
-                  << "    and (&)\n"
-                  << "    or  (|)\n"
-                  << "    xor (^)\n"
-                  << "    dup\n"
-                  << "    swap\n"
-                  << "    eqz\n"
-                  << "    pop\n"
-                  << "\nExample:\n    " << argv[0] << " 1 2 + 4 swap sub\n\n";
-        exit(-1);
+    const static char *opt_str = "hg:";
+    const static struct option long_options[] = {
+        {"help",   no_argument,       0, 'h'},
+        {"golden", required_argument, 0, 'g'},
+        {0, 0, 0, 0}
+    };
+
+    int opt_idx;
+    int golden;
+    bool has_golden;
+    while (1) {
+        int c;
+        if ((c = getopt_long(argc, argv, opt_str, long_options, &opt_idx)) ==
+            -1) break;
+
+        switch (c) {
+        case 'h':
+            usage(argv[0]);
+            return 0;
+        case 'g':
+            golden = std::stoi(optarg);
+            has_golden = true;
+            break;
+        default:
+            usage(argv[0]);
+            return 1;
+        }
     }
+
+    // checking if elf file is provided
+    if (optind == argc) {
+        std::cerr << "\nError: No postfix expression specified\n";
+        usage(argv[0]);
+        return 1;
+    }
+
+    // Generate expression from argv
+    std::vector<std::string> expr(argv + optind, argv + argc);
 
     sc_clock clk("clk", 1, SC_NS);
     sc_signal<bool> rst_n("rst_n");
@@ -58,10 +100,7 @@ int sc_main(int argc, char *argv[])
     pfc->push_opd(push_opd);
     pfc->RDY_push(push_ready);
 
-    // Generate expression from argv
-    std::vector<std::string> expr(argv + 1, argv + argc);
-
-    InstGen *igen = new InstGen("igen", expr);
+    InstGen *igen = new InstGen("igen", expr, has_golden, golden);
     igen->clk_i(clk);
     igen->rst_ni(rst_n);
     igen->full(full);

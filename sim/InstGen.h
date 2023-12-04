@@ -25,10 +25,13 @@ SC_MODULE(InstGen) {
     sc_in<bool> push_ready;
 
     // Constructor
-    InstGen(sc_module_name name, std::vector<std::string> &expr)
+    InstGen(sc_module_name name, std::vector<std::string> &expr,
+            bool has_golden, int golden)
         : sc_module(name)
     {
         this->expr = expr;
+        this->has_golden = has_golden;
+        this->golden = golden;
         SC_HAS_PROCESS(InstGen);
         SC_THREAD(handle_clk);
         sensitive << clk_i.neg();
@@ -37,6 +40,8 @@ SC_MODULE(InstGen) {
 
   private:
     std::vector<std::string> expr;
+    bool has_golden;
+    int golden;
     void handle_clk();
     std::pair<bool, int> parse_expr(std::string);
 };
