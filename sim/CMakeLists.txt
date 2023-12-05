@@ -20,5 +20,5 @@ target_link_bsim_systemc(pfc-sim
   mkPostfixCalculator32x32
   ${PROJECT_SOURCE_DIR}/cores/PostfixCalculator32x32/PostfixCalculator32x32.bsv
 
-  SRC_DIRS
-  ${PROJECT_SOURCE_DIR}/lib)
+  LINK_LIBS
+  Stack PostfixCalculator)
